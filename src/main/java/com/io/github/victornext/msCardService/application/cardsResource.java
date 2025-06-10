@@ -1,7 +1,9 @@
 package com.io.github.victornext.msCardService.application;
 
+import com.io.github.victornext.msCardService.application.representation.CardPerClientResponse;
 import com.io.github.victornext.msCardService.application.representation.CardSaveRequest;
 import com.io.github.victornext.msCardService.domain.Card;
+import com.io.github.victornext.msCardService.domain.ClientCard;
 import com.netflix.discovery.converters.Auto;
 import jakarta.persistence.Id;
 import lombok.RequiredArgsConstructor;
@@ -11,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("cards")
@@ -19,7 +22,7 @@ public class cardsResource {
 
 
     private final CardService service;
-
+    private final ClientCardService clientCard;
 
 
     @GetMapping
@@ -40,4 +43,15 @@ public class cardsResource {
         List<Card> cards = service.getCardByIncomeOrLow(income);
         return ResponseEntity.ok(cards);
     }
+
+
+    @GetMapping(params = "cpf")
+    public ResponseEntity<List<CardPerClientResponse>> getCardsByClient(@RequestParam("cpf") String cpf){
+        List<ClientCard> list = clientCard.listCardsByCpf(cpf);
+        List<CardPerClientResponse> resultList = list.stream().map(CardPerClientResponse::fromModel).collect(Collectors.toList());
+
+
+        return ResponseEntity.ok(resultList);
+    }
+
 }
